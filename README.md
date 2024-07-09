@@ -26,4 +26,7 @@ Everyone can notice that there's a lack of Data regarding loans submitted with H
 
 In this way, if there are high correlations, we are able to associate a Copound-listed token with Hedera Ecosystem tokens, thanks to their correlation in the volatility behaviours.
 
-The code shows all the steps done to extract data; we downloaded a list of all history daily prices of Hedera and Compound Tokens, then we scaled all of them to the token with minimum number of days price history, and built a correlation Matrix. n the 'Data' folder, there's the correlation Matrix with data required.
+The code shows all the steps done to extract data; we downloaded a list of all history daily prices of Hedera and Compound Tokens, then we scaled all of them to the token with minimum number of days price history, and built a correlation Matrix.
+
+## Data Extraction
+
