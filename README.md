@@ -24,9 +24,9 @@ In the second one there's the enumerated code for each step (extraction, process
 ## Volatility Analysis
 Everyone can notice that there's a lack of Data regarding loans submitted with Hedera Ecosystem Tokens. So, we have to build a Dataset with Tokens that acts similarly to Hedera Tokens. The best thing we could do, is to track volatility of these Tokens and compare them with Tokens listed in Compound Markets, that are the data we are going to use to Train our Model.
 
-In this way, if there are high correlations, we are able to associate a Copound-listed token with Hedera Ecosystem tokens, thanks to their correlation in the volatility behaviours.
+In this way, if there are high correlations, we are able to relate Compound-listed tokens with Hedera Ecosystem tokens, thanks to their correlation in the volatility behaviours.
 
-The code shows all the steps done to extract data; we downloaded a list of all history daily prices of Hedera and Compound Tokens, then we scaled all of them to the token with minimum number of days price history, and built a correlation Matrix.
+The code shows all the steps done to extract data; we downloaded a list of all history daily prices of Hedera and Compound Tokens, then we scaled all of them to the token with minimum number of days price history, and built a correlation Matrix. The output is stored n 'Data' Folder, in Correlation Matrix PNG File.
 
 ## Data Extraction
 
