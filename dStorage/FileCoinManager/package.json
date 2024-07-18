@@ -1,0 +1,20 @@
+{
+  "name": "updateretrieve",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "upload": "run-func main.js uploadEncrypted",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@lighthouse-web3/sdk": "^0.3.3",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.1",
+    "fs": "^0.0.1-security"
+  }
+}
