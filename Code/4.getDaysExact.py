@@ -81,14 +81,14 @@ def replace_nan_with_percentile(df, column, percentile_value):
     return print(df.head())
 
 # Read the CSV file
-df = pd.read_csv('2.RawLoans.csv')
+df = pd.read_csv('3.ProcessedLoans.csv')
 
 # Calculate the 95th percentile
 percentile_95 = calculate_percentile(df['position_days'], 95)
 print(f"The 95th percentile of loan durations is: {percentile_95} days")
 
 # Replace NaN values with the 95th percentile
-#df = replace_nan_with_percentile(df, 'position_days', percentile_95)
+df = replace_nan_with_percentile(df, 'position_days', percentile_95)
 
 # Plot the loan duration distribution
 plot_loan_duration_distribution(df)
