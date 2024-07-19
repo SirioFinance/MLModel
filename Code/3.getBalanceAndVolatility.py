@@ -7,7 +7,7 @@ from time import sleep
 def get_price(address, block):
     usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
     usdt = "0xdac17f958d2ee523a2206206994597c13d831ec7"
-    print(address, block)
+
     f_params = {
         "query":'{ pools(where: {token0: "%s", token1: "%s"}, block: {number: %s} orderBy: liquidity, orderDirection: desc){ id token0Price token1Price liquidity } }'%(address, usdc, str(block)),
         "operationName": None,
@@ -36,7 +36,6 @@ def get_price(address, block):
         except Exception as exc:
             sleep(0.01)
             price = float(requests.post(url, headers=headers, data=json.dumps(s_params)).json()['data']['pools'][0]['token1Price'])
-    print(price)
     return price
 
 def volatility(address, block):
@@ -94,8 +93,6 @@ collaterals = {
 
 
 df = pd.read_csv('2.RawLoans.csv')
-
-header = ['collateral_dollar_balance','borrow_dollar_balance','borrow_collateral_ratio','','','','','','','','','','','','']
 balances = np.array([])
 
 #columns order - collateral_dollar_balance|borrow_dollar_balance|borrow_collateral_ratio|dt_opened|block_opened|position_days|hour_opened|day_opened|month_opened|weth_borrow_balance|usdc_borrow_balance|wbtc_borrow_balance|comp_borrow_balance|uni_borrow_balance|link_borrow_balance|weth_collateral_balance|usdc_collateral_balance|wbtc_collateral_balance|comp_collateral_balance|uni_collateral_balance|link_collateral_balance
@@ -108,6 +105,7 @@ for idx, row in df.iterrows():
 
     borrow_dollar_balance = 0
     collateral_dollar_balance = 0
+
 
     #collaterals
     for collateral in collaterals:
@@ -134,34 +132,34 @@ for idx, row in df.iterrows():
     try:
         if borrow_dollar_balance/collateral_dollar_balance < 1:
             balances = np.append(balances, [collateral_dollar_balance, borrow_dollar_balance, borrow_dollar_balance/collateral_dollar_balance])
-            balances = np.append(balances, row[1:-12])
+            balances = np.append(balances, row[1:])
             balances = np.append(balances, borrow_balances/borrow_dollar_balance)
             balances = np.append(balances, collateral_balances/collateral_dollar_balance)
 
     except:
         try:
             balances = np.append(balances, [collateral_dollar_balance, 0, 0])
-            balances = np.append(balances, row[1:-12])
+            balances = np.append(balances, row[1:])
             balances = np.append(balances, borrow_balances/borrow_dollar_balance)
             balances = np.append(balances, collateral_balances/collateral_dollar_balance)
         except:
             try:
                 balances = np.append(balances, [0, borrow_dollar_balance, 0])
-                balances = np.append(balances, row[1:-12])
+                balances = np.append(balances, row[1:])
                 balances = np.append(balances, borrow_balances/borrow_dollar_balance)
                 balances = np.append(balances, collateral_balances/collateral_dollar_balance)
             except:
                 balances = np.append(balances, [0, 0, 0])
-                balances = np.append(balances, row[1:-12])
+                balances = np.append(balances, row[1:])
                 balances = np.append(balances, borrow_balances/borrow_dollar_balance)
                 balances = np.append(balances, collateral_balances/collateral_dollar_balance)
 
     print(row['block_opened'])
 
     
-balances = balances.reshape(-1, 21)
+balances = balances.reshape(-1, 33)[:, [3,4,5,6,7,8,9,15,21,27,10,16,22,28,11,17,23,29,12,18,24,30,13,19,25,31,14,20,26,32,0,1,2]]
 
-headerList = ['collateral_usd_balance', 'borrow_usd_balance', 'borrow-collateral-ratio', 'dt_opened', 'block_opened','position_days', 'hour_opened', 'day_opened', 'month_opened', 'weth_borrow_balance', 'usdc_borrow_balance', 'wbtc_borrow_balance', 'comp_borrow_balance', 'uni_borrow_balance', 'link_borrow_balance', 'weth_collateral_balance', 'usdc_collateral_balance', 'wbtc_collateral_balance', 'comp_collateral_balance', 'uni_collateral_balance', 'link_collateral_balance']     
+headerList = ['dt_opened', 'block_opened','position_days', 'hour_opened', 'day_opened', 'month_opened', 'weth_borrow_balance', 'weth_collateral_balance', 'weth_borrow_balance_share', 'weth_collateral_balance_share','usdc_borrow_balance', 'usdc_collateral_balance', 'usdc_borrow_balance_share', 'usdc_collateral_balance_share','wbtc_borrow_balance', 'wbtc_collateral_balance', 'wbtc_borrow_balance_share', 'wbtc_collateral_balance_share','comp_borrow_balance', 'comp_collateral_balance', 'comp_borrow_balance_share', 'comp_collateral_balance_share','uni_borrow_balance', 'uni_collateral_balance', 'uni_borrow_balance_share', 'uni_collateral_balance_share','link_borrow_balance', 'link_collateral_balance', 'link_borrow_balance_share', 'link_collateral_balance_share','collateral_usd_balance', 'borrow_usd_balance', 'borrow-collateral-ratio']     
 
-df = pd.DataFrame(balances.reshape(-1, 21), columns = headerList)
-df.to_csv("3.FineLoans.csv")
+df = pd.DataFrame(balances, columns = headerList)
+df.to_csv("3.ProcessedLoans.csv")
