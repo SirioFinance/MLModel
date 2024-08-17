@@ -27,23 +27,24 @@ There is a lack of data regarding loans with Hedera Ecosystem Tokens since we ar
 
 By identifying high correlations, we can relate Compound-listed tokens with Hedera Ecosystem tokens through their volatility behavior.
 
-The code demonstrates the steps taken to extract data. We downloaded a list of all historical daily prices of Hedera and Compound Tokens, scaled all of them to the token with the minimum number of days of price history, and built a correlation matrix. The output is stored in the 'Data' folder as a Correlation Matrix PNG file.
+The code demonstrates the steps taken to extract data. We downloaded a list of all historical daily prices of Hedera and Compound Tokens, scaled all of them to the token with the minimum number of days of price history, and built a correlation matrix. The output is stored in the `Data` folder as a Correlation Matrix PNG file.
 
 ## Data Extraction
-We used GraphQL and Messari architecture to fetch data from Compound Markets, gathering data on loans from block number 15,000,000 to 19,000,000. The resulting dataset is stored in /Data/2.RawLoans.csv. For each loan, we gathered:
+We used GraphQL and Messari architecture to fetch data from Compound Markets, gathering data on loans from block number 15,000,000 (August 2022) to 19,000,000 (January 2024). The resulting dataset is stored in `/Data/2.RawLoans.csv`. For each loan, we gathered:
 
-The block number and datetime the loan was started
-Number of days of duration (if unavailable, we built a Gaussian distribution to cover the missing data gap)
-Quantity and types of tokens collateralized or borrowed
+1)The block number and datetime the loan was started
+2)Number of days of duration (if unavailable, we built a Gaussian distribution to cover the missing data gap)
+3)Quantity and types of tokens collateralized or borrowed
 Data Processing
-To evaluate risks, it's essential to define the value in dollars of collateral and borrows. The /Code/getBalanceAndVolatility.py script performs this task. For each loan, at the time of transaction submission, it uses SubGraphs to fetch the historical price of the assets at the time of block extraction, enabling the calculation of:
 
-1) Collateral/Borrow Share of each asset in USD
+To evaluate risks, it's essential to define the value in dollars of collateral and borrows. The `/Code/getBalanceAndVolatility.py` script performs this task. For each loan, at the time of transaction submission, it uses SubGraphs to fetch the historical price of the assets at the time of block extraction, enabling the calculation of:
+
+1) Collateral/Borrow Share of each asset in USD (How much of WETH/WBTC/UNI/LINK(COMP is used as collateral/Borrow?)
 2) Total Collateral Balance in USD
 3) Total Borrow Balance in USD
 4) Borrow/Collateral Ratio in USD
 
-## Missing Data Issue
-If you check the 'duration_days' column in /Data/2.RawLoans.csv, you will notice that some loans are missing the duration of the loan. To address this, we employed a statistical approach by plotting a Gaussian distribution and calculating the 95th percentile of the loan durations.
+## Missing Data Issue & Get Prices Script
+The code used to build the Gaussian Distribution model is located in `/Code/4.getDaysExact.py`. The output is the expected value of 259 days, along with a graph representing the constructed Gaussian Distribution.
 
-The resulting value is 256 days, so using the fillna command of the Pandas library, we replaced all null values with this value.
+In this paragraph, we also briefly mention the script located in `/Code/5.getPrices.py`, through which we obtain the historical prices of all assets listed on Compound (USDC, WETH, WBTC, UNI, COMP, LINK) from block number 15,400,000 (around 08-26-2022) to block number 19,999,000 (on 06-01-2024). These prices will be used to determine whether the loans for which we have collected data will be liquidated or not.
