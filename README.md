@@ -60,4 +60,4 @@ In the last script, we retrieve all the loan data that was previously extracted 
 
 Our goal is to predict the probability of this event occurring. We have data on the loans made (when they started, how many days they lasted, the assets deposited as collateral/borrowed) and, through the previous step (`Prices Script`), we have the prices of all the assets. What do we do? We simulate the loans of which we gathered data, being closed after X days (the amount indicated by the `position_days` value) and observe what value the `Health Factor` assumes during this period. If it exceeds the `Liquidation Threshold` of 90% at any point, the `liquidation_event_happened` value will be switched to `True`. This is what happens in `Code/6.simulateLiquidation.py` and the output is stored in `Data/5.Dataset.csv`, the final version of our Dataset.
 
-[Link to PDF](docs/Risk_Model_Documentation.pdf)
+[Link to PDF](docs/Risk_Model_Documentation.pdf)  
