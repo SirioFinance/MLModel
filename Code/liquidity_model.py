@@ -62,7 +62,7 @@ class RiskModel:
         X['day'] = X['dt_opened'].dt.day
         X['hour'] = X['dt_opened'].dt.hour
         return X
-
+ 
     def preprocess_data(self):
         logging.info("Preprocessing data...")
         self.X_train = self.extract_date_features(self.X_train)
@@ -138,5 +138,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-       
