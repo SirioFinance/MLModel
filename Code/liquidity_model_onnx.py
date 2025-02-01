@@ -5,10 +5,9 @@ import logging
 import argparse
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import log_loss
+from sklearn.metrics import classification_report, roc_auc_score, log_loss
 from imblearn.over_sampling import RandomOverSampler
 import xgboost as xgb
-import onnx
 from onnxmltools.convert import convert_xgboost
 from onnx import save_model
 import pickle
@@ -32,6 +31,8 @@ class RiskModel:
         self.scaler = StandardScaler()
         self.model_file = 'xgboost_model.onnx'  # Model file in ONNX format
         self.scaler_file = 'scaler.pkl'  # Scaler file path
+        self.predictions_file = 'predictions.csv'  # Predictions file path
+        self.feature_names = None
 
     def load_and_prepare_data(self):
         if not self.file_path or not os.path.exists(self.file_path):
@@ -109,8 +110,30 @@ class RiskModel:
     def evaluate_model(self):
         logging.info("Evaluating model...")
         y_pred_probs_xgb = self.xgb_model.predict_proba(self.X_test_scaled)[:, 1]
+        # Log the probabilities
+        formatted_probs = ['{:.6f}'.format(prob) for prob in y_pred_probs_xgb]  # Formatting the probabilities
+        logging.info(f'Predicted Probabilities of Liquidity Risk: {formatted_probs}')  # Show first 10 to avoid too much logging
+        
+            # Create a DataFrame with the loan_id and its corresponding predicted probability
+        results_df = pd.DataFrame({
+            'loan_id': self.X_test['loan_id'],  # Ensure you have 'loan_id' in the test set DataFrame
+            'liquidity_risk_probability': formatted_probs
+        })
+        
+        # Save this DataFrame to a CSV file
+        results_df.to_csv('liquidity_risk_probabilities.csv', index=False)
+        logging.info("Liquidity risk probabilities and loan IDs saved to liquidity_risk_probabilities.csv")
+
         log_loss_xgb = log_loss(self.y_test, y_pred_probs_xgb)
         logging.info(f'X Gradient Boosting Log Loss: {log_loss_xgb:.4f}')
+
+        # Additional evaluations if needed
+        y_pred = self.xgb_model.predict(self.X_test_scaled)
+        logging.info("Classification Report:")
+        logging.info(f"\n{classification_report(self.y_test, y_pred)}")
+
+        auc = roc_auc_score(self.y_test, y_pred_probs_xgb)
+        logging.info(f"ROC AUC Score: {auc:.4f}")
 
     def predict(self, new_data_path):
         logging.info("Predicting with new data...")
@@ -120,14 +143,20 @@ class RiskModel:
         numerical_cols = new_data.select_dtypes(include=['number']).columns
         new_data_scaled = self.scaler.transform(new_data[numerical_cols])
 
-        # Load the model
+        # Load the ONNX model
         session = rt.InferenceSession(self.model_file)
         input_name = session.get_inputs()[0].name
         output_name = session.get_outputs()[0].name
         
         # Predict using ONNX model
         predictions = session.run([output_name], {input_name: new_data_scaled.astype(np.float32)})[0]
-        return predictions
+
+        # Save predictions to CSV
+        predictions_df = pd.DataFrame(predictions, columns=['predictions'])
+        predictions_df.to_csv(self.predictions_file, index=False)
+        logging.info(f"Predictions saved to {self.predictions_file}")
+
+        return predictions_df
 
 
 def main():
